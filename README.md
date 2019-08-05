@@ -1,37 +1,78 @@
-## Welcome to GitHub Pages
+# Hydra
 
-You can use the [editor on GitHub](https://github.com/rail-europe/era-api-www/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+Marketing site template for Jekyll. Browse through a [live demo](https://proud-alligator.cloudvent.net/).
+Increase the web presence of your brand with this configurable theme.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+![Hydra template screenshot](images/_screenshot.png)
 
-### Markdown
+Hydra was made by [CloudCannon](http://cloudcannon.com/), the Cloud CMS for Jekyll.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+Find more templates, themes and step-by-step Jekyll tutorials at [CloudCannon Academy](https://learn.cloudcannon.com/).
 
-```markdown
-Syntax highlighted code block
+## Features
 
-# Header 1
-## Header 2
-### Header 3
+* Contact form
+* Pre-built pages
+* Pre-styled components
+* Blog with pagination
+* Post category pages
+* Disqus comments for posts
+* Staff and author system
+* Configurable footer
+* Optimised for editing in [CloudCannon](http://cloudcannon.com/)
+* RSS/Atom feed
+* SEO tags
+* Google Analytics
 
-- Bulleted
-- List
+## Setup
 
-1. Numbered
-2. List
+1. Add your site and author details in `_config.yml`.
+2. Add your Google Analytics and Disqus keys to `_config.yml`.
+3. Get a workflow going to see your site's output (with [CloudCannon](https://app.cloudcannon.com/) or Jekyll locally).
 
-**Bold** and _Italic_ and `Code` text
+## Develop
 
-[Link](url) and ![Image](src)
-```
+Hydra was built with [Jekyll](http://jekyllrb.com/) version 3.3.1, but should support newer versions as well.
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+Install the dependencies with [Bundler](http://bundler.io/):
 
-### Jekyll Themes
+~~~bash
+$ bundle install
+~~~
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/rail-europe/era-api-www/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+Run `jekyll` commands through Bundler to ensure you're using the right versions:
 
-### Support or Contact
+~~~bash
+$ bundle exec jekyll serve
+~~~
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+## Editing
+
+Hydra is already optimised for adding, updating and removing pages, staff, advice, company details and footer elements in CloudCannon.
+
+### Posts
+
+* Add, update or remove a post in the *Posts* collection.
+* The **Staff Author** field links to members in the **Staff** collection.
+* Documentation pages are organised in the navigation by category, with URLs based on the path inside the `_docs` folder.
+* Change the defaults when new posts are created in `_posts/_defaults.md`.
+
+### Contact Form
+
+* Preconfigured to work with CloudCannon, but easily changed to another provider (e.g. [FormSpree](https://formspree.io/)).
+* Sends email to the address listed in company details.
+
+### Staff
+
+* Reused around the site to save multiple editing locations.
+* Add `excluded_in_search: true` to any documentation page's front matter to exclude that page in the search results.
+
+### Navigation
+
+* Exposed as a data file to give clients better access.
+* Set in the *Data* / *Navigation* section.
+
+### Footer
+
+* Exposed as a data file to give clients better access.
+* Set in the *Data* / *Footer* section.
