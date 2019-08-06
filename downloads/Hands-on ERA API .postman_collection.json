@@ -1,0 +1,137 @@
+{
+	"info": {
+		"_postman_id": "4a027630-9a0d-4fbd-8b78-5babb9434375",
+		"name": "Hands-on ERA API ",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Book offers",
+			"item": [
+				{
+					"name": "1.1 Shopping",
+					"item": [
+						{
+							"name": "Search for pass offers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "ece706fe-3c6a-4abe-8833-786e30864c88",
+										"exec": [
+											"var moment = require('moment');",
+											"var validityStartDate = moment().add(7, \"days\").format(\"YYYY-MM-DD\");",
+											"",
+											"postman.setEnvironmentVariable(\"validityStartDate\", validityStartDate);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "d304191e-4fa9-4194-b537-3821a89b7bc2",
+										"exec": [
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"function isNotEmpty(array) {",
+											"    return array && array.length;",
+											"}",
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"tests[\"Offers are present\"] = isNotEmpty(jsonResponseBody.offers);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-Point-Of-Sale",
+										"value": "{{pointOfSale}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"place\": {\n        \"code\": \"CH\",\n        \"label\": \"Switzerland\"\n    },\n    \"validityStartDate\": \"{{validityStartDate}}\",\n    \"travelers\": [\n        {\n            \"age\": 30\n        },\n        {\n            \"age\": 65\n        },\n        {\n            \"age\": 12\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{eraUrl}}/offers/passes/searches",
+									"host": [
+										"{{eraUrl}}"
+									],
+									"path": [
+										"offers",
+										"passes",
+										"searches"
+									]
+								},
+								"description": "\t\t"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "eyJraWQiOiI4WnlEbG82dzZ3bk1OOGdicXcxWE5uYTdjdmRRSlwvVTJFQkJqT1Q5MFREVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1bnVqZ2lvdHRiOThkZDV0cDFlczNvYTZhIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhY2NlcHRhbmNlLW92cy1lcmFtYWluLWFwaS1zZXJ2ZXJcL2FwaTpmdWxsIiwiYXV0aF90aW1lIjoxNTY1MTA1MDg1LCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9iVDJKWTZNaXIiLCJleHAiOjE1NjUxMDg2ODUsImlhdCI6MTU2NTEwNTA4NSwidmVyc2lvbiI6MiwianRpIjoiZWUxZTg0MzctMDYyZS00MGI4LWIwYjAtZDE3YjI0MGE3YjIwIiwiY2xpZW50X2lkIjoidW51amdpb3R0Yjk4ZGQ1dHAxZXMzb2E2YSJ9.Y-W4ns6j34H0dy8iRgr-6Jdl0BsGMZPEbhbsSNr8sq5vpoEc84fyvmY0YbWNgj1yy17Xju2IyTwV3-mzqCrOqslHycptpgpETtuBYv-zag6pRxwNJdp9qRMdl1710LK1sf3KwO-z2_hxH33GX_YlISJvBZatfD04g9qTYUFAmkR4tBK7GL_5FuJ6uZcsXgJaPcAp0bryOyAxKD_BpaapgFQo0gxK6KpEv0-2FMMkpTrb7zLYrmkW4dYWLu7kxDw_l-44_21XGgGCYOUYjwZw-3xSJBkXTmn6UHhuhB4kflTJFsMRqmzqw-CtPnrQ4eXUjyPLh3Lm--1g-fjDcCEsFA",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "Bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "4edfad27-10e1-4bac-9482-c25a7c22789f",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "ad21c7e4-59f5-41bb-90d8-34c69f5c15c4",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
