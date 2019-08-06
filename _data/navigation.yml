@@ -3,7 +3,7 @@
   new_window: false
   highlight: false
 - name: Try out with Postman
-  link: downloads/Hands-on ERA API .postman_collection.json
+  link: /downloads/Hands-on ERA API .postman_collection.json
   new_window: true
   highlight: false
 - name: Documentation
