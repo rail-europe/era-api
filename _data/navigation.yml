@@ -2,11 +2,15 @@
   link: /blog/
   new_window: false
   highlight: false
-- name: Try out with Postman
-  link: /downloads/Hands-on ERA API .postman_collection.json
-  new_window: true
-  highlight: false
 - name: Documentation
   link: https://era-dev.docs.stoplight.io
+  new_window: true
+  highlight: false
+name: Try out
+  link: /postman
+  new_window: false
+  highlight: false
+- name: About Rail Europe
+  link: https://www.raileurope.com/about-rail-europe
   new_window: true
   highlight: true
