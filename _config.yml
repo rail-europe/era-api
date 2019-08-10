@@ -2,7 +2,7 @@
 # Site
 
 title: Rail Europe
-url: "https://rail-europe.github.io/era-api/"
+url: "https://rail-europe.github.io/era-api"
 baseurl:
 google_analytics_key:
 google_maps_javascript_api_key:
@@ -18,12 +18,12 @@ author:
 social:
   name: Rail Europe ERA API
   links:
-    - https://rail-europe.github.io/era-api/
+    - https://rail-europe.github.io/era-api
 
 # -----
 # Build
 
-timezone: Etc/UTC
+timezone: Europe/Paris
 
 collections:
   staff_members:

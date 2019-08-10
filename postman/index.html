@@ -1,26 +1,153 @@
 ---
-title: Releases
-description: Keep up with the latest news.
+title: Hands-on ERA API
+description: Configure a postman workspace for ERA API in a nutshell
 ---
 
-<div class="text-container">
-	<p class="editor-link"><a href="cloudcannon:collections/_posts" class="btn"><strong>&#9998;</strong> Add Post</a></p>
-	<ul class="blog-posts">
-		{% include list-posts.html posts=paginator.posts %}
-	</ul>
-
-	{% if paginator.total_pages > 1 %}
-		<!-- Pagination links -->
-		<div class="pagination">
-			{% if paginator.previous_page %}
-				<a href="{% include relative-src.html src=paginator.previous_page_path %}" class="previous btn">&larr; Newer posts</a>
-			{% endif %}
-
-			<span class="page_number ">{{ paginator.page }} of {{ paginator.total_pages }}</span>
-
-			{% if paginator.next_page %}
-				<a href="{% include relative-src.html src=paginator.next_page_path %}" class="next btn">Older posts &rarr;</a>
-			{% endif %}
+<div class="content">
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<h2><strong>Import ERA API collection.</strong></h2>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/1. import.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
 		</div>
-	{% endif %}
-</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>1. Choose "import from link"</p>
+				<p>2. Paste this link: <a href="https://www.getpostman.com/collections/c7adfdb62531e7013a4e">Hands-on ERA API collection</a></p>
+				<p>3. Import your new collection</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/1.1 import collection link.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<h2><strong>Manage ERA API environments.</strong></h2>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/2. manage environments.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>1. Select to import an existing environment</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/2.1 import environment.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>1. Download on a local directory: <a href="{{ site.baseurl }}/downloads/Hands-on ERA API .postman_collection.json">Hands-on ERA API environment template</a></p>
+				<p>2. Select to import an existing environment</p>
+				<p>3. Select file <strong>Hand-on ERA API acceptance.postman_environment.json</strong> in your local directory</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/2.1 import environment.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>4. Add the imported environment</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/2.3 add environment.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>5. Complete the environment configuration with the settings provided by Rail Europe</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/2.4 complete environment.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<h2><strong>Search some point-to-point offers...</strong></h2>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/3. try search ptp offers.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>You're not authorized (yet!) to access ERA API, you need to generate a token.</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/3.1 unauthorized.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>1. Select Authorization tab to authorize your request</p>
+				<p>2. And go to "Hands-on ERA API" link</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/4. authorize client.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>3. Get a new access token</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/4.1 get new access token.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>4. Request ERA authorization server for a new token</p>
+				<p>5. And finally select "Use Token" option</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/4.2 request token.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>6. Now you can update your configuration with the provided access token</p>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/4.4 update configuration.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>
+	<section>
+		<div class="container flex">
+			<div class="text editable">
+				<p>7. Submit again your point-to-point offers search</p>
+				<h2>And voila, you finally succeed doing your first ERA API request!</h2>
+			</div>
+			<div class="image">
+				<img src="{{ site.baseurl }}/images/postman/5. success.png" alt="Import from blank workspace" class="screenshot editable" />
+			</div>
+		</div>
+	</section>

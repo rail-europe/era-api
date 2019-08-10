@@ -1,17 +1,21 @@
 ---
 layout: default
 ---
+<section class="hero">
+    <div class="container {% if page.full_width %}max-container{% endif %}">
+        {% if page.heading %}
+        <h1><strong>{{ page.heading }}</strong></h1>
+        {% elsif page.title and page.layout != 'archive' %}
+        <h1><strong>{{ page.title }}</strong></h1>
+        {% endif %}
+        {% if page.description %}
+        <h2 class="subtext">{{ page.description }}</h2>
+        {% endif %}
+    </div>
+</section>
 <div class="content">
 	<section class="page">
 		<div class="container {% if page.full_width %}max-container{% endif %}">
-			{% if page.heading %}
-				<h2>{{ page.heading }}</h2>
-			{% elsif page.title and page.layout != 'archive' %}
-				<h2>{{ page.title }}</h2>
-			{% endif %}
-			{% if page.description %}
-				<p class="subtext">{{ page.description }}</p>
-			{% endif %}
 			{{ content }}
 		</div>
 	</section>
