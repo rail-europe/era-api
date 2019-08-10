@@ -6,7 +6,7 @@
   link: https://era-dev.docs.stoplight.io
   new_window: true
   highlight: false
-name: Try out
+- name: Try out
   link: /postman
   new_window: false
   highlight: false
