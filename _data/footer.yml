@@ -2,7 +2,7 @@
   - name: Releases
     link: /blog/
   - name: Documentation
-    link: https://era-dev.docs.stoplight.io
+    link: https://era.docs.stoplight.io
     new_window: true
   - name: Try out
     link: /postman

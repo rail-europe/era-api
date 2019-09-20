@@ -3,7 +3,7 @@
   new_window: false
   highlight: false
 - name: Documentation
-  link: https://era-dev.docs.stoplight.io
+  link: https://era.docs.stoplight.io
   new_window: true
   highlight: false
 - name: Try out
