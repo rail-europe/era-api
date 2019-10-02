@@ -3,7 +3,7 @@
   new_window: false
   highlight: false
 - name: Documentation
-  link: https://era.docs.stoplight.io
+  link: https://docs.era.raileurope.com
   new_window: true
   highlight: false
 - name: Try out

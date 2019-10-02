@@ -2,7 +2,7 @@
   - name: Releases
     link: /blog/
   - name: Documentation
-    link: https://era.docs.stoplight.io
+    link: https://docs.era.raileurope.com
     new_window: true
   - name: Try out
     link: /postman
