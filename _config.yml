@@ -3,7 +3,7 @@
 
 title: Rail Europe
 url: "https://rail-europe.github.io/era-api"
-baseurl: ""
+baseurl: "/era-api"
 google_analytics_key:
 google_maps_javascript_api_key:
 disqus_shortname:
