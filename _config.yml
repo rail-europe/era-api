@@ -25,6 +25,10 @@ social:
 
 excerpt_separator: <!--more-->
 
+site:
+  github:
+    url: https://rail-europe.github.io/era-api
+
 timezone: Europe/Paris
 
 collections:
