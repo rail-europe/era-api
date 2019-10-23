@@ -27,7 +27,7 @@ excerpt_separator: <!--more-->
 
 site:
   github:
-    url: https://rail-europe.github.io/era-api
+    url: https://rail-europe.github.io
 
 timezone: Europe/Paris
 
