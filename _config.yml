@@ -23,6 +23,8 @@ social:
 # -----
 # Build
 
+excerpt_separator: <!--more-->
+
 timezone: Europe/Paris
 
 collections:
@@ -30,7 +32,7 @@ collections:
     _hide_content: true
 
 paginate: 10
-paginate_path: "/blog/:num/"
+paginate_path: "/releases/:num/"
 permalink: pretty
 
 defaults:

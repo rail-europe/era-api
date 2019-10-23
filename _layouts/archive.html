@@ -3,7 +3,7 @@ layout: page
 ---
 
 <div class="text-container">
-	{% assign blog = site.pages | where: "path", "blog/index.html" | first %}
+	{% assign blog = site.pages | where: "path", "releases/index.html" | first %}
 
 	{% if blog.title %}
 		<h2>{{ blog.title }}</h2>
@@ -14,7 +14,7 @@ layout: page
 	{% endif %}
 
 	<div class="center-text">
-		<span class="blog-filter cross"><a href="{{ site.baseurl }}/blog/">{{ page.title | capitalize }}</a></span>
+		<span class="blog-filter cross"><a href="{{ site.baseurl }}/releases/">{{ page.title | capitalize }}</a></span>
 	</div>
 
 	<ul class="blog-posts">
