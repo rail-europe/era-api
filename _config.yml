@@ -74,6 +74,8 @@ defaults:
 jekyll-archives:
   enabled:
     - categories
+  permalinks:
+    category: /releases/categories/:name/
 
 plugins:
   - jekyll-archives
