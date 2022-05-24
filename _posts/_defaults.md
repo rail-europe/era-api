@@ -3,17 +3,20 @@ date: 2019-XX-XX
 title: Release 1.XXX.X
 categories:
   - releases
-author_staff_member: xxxxx
 ---
 
 < your introduction sentence >
 
-## features/improvements
-none
+**<u>features/improvements</u>**
+- My feature 
+- Muy improvement 
 
-## fixes
-none
+**<u>fixes</u>**
 
-## api changes
-\+ attribute/service\
-\- attribute/service
+- My fixes
+
+**<u>api changes</u>**
+
+| Deprecated field    |     Substitute      |
+|---------------------|:-------------------:|
+| myObject/myOldField | myObject/myNewField |
