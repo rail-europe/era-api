@@ -1,8 +1,6 @@
 ---
 date: 2019-XX-XX
 title: Release 1.XXX.X
-categories:
-  - releases
 ---
 
 < your introduction sentence >
