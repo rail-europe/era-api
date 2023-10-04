@@ -1,0 +1,3657 @@
+{
+	"info": {
+		"_postman_id": "6d91c71a-a10a-4ce8-a4ed-e7eb5408cfe6",
+		"name": "Hand-on ERA API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25484723",
+		"_collection_link": "https://era-raileurope.postman.co/workspace/ERA-Team~66d36441-956b-4f1d-8df0-47860a893172/collection/25484723-6d91c71a-a10a-4ce8-a4ed-e7eb5408cfe6?action=share&source=collection_link&creator=25484723"
+	},
+	"item": [
+		{
+			"name": "1. AUTHENTICATE",
+			"item": [
+				{
+					"name": "Authenticate as {{accessTokenClientId}}",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"var idToken = data.access_token;",
+									"",
+									"// init token",
+									"tests['idToken is defined'] = typeof idToken !== 'undefined'",
+									"postman.setEnvironmentVariable(\"idToken\", idToken);",
+									"",
+									"// generate correlationId",
+									"postman.setEnvironmentVariable(\"correlationId\", createUUID());",
+									"",
+									"// function that generate a random uuid",
+									"function createUUID(){",
+									"    var dt = new Date().getTime();",
+									"    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {",
+									"        var r = (dt + Math.random()*16)%16 | 0;",
+									"        dt = Math.floor(dt/16);",
+									"        return (c=='x' ? r :(r&0x3|0x8)).toString(16);",
+									"    });",
+									"    return uuid;",
+									"}",
+									"",
+									"// POS",
+									"postman.setEnvironmentVariable(\"pos\", \"\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{accessTokenClientId}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{accessTokenClientSecret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope ",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{accessTokenUrl}}/oauth2/token",
+							"protocol": "https",
+							"host": [
+								"{{accessTokenUrl}}"
+							],
+							"path": [
+								"oauth2",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. SEARCH OFFERS",
+			"item": [
+				{
+					"name": "SEARCH OFFERS-PTP",
+					"item": [
+						{
+							"name": "Search for RDG offers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 weed int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 7);",
+											"",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"GB:bath_spa\"\n            },\n            \"destination\": {\n                \"type\": \"city\",\n                \"code\": \"GB:manchester\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search for TRENITALIA or NTV Italo offers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 weed int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 7);",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');",
+											"date.setDate(date.getDate() + 7);",
+											"postman.setEnvironmentVariable(\"return_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"legs\": [\n    {\n      \"origin\": {\n        \"type\": \"city\",\n        \"code\": \"IT:rome\"\n      },\n      \"destination\": {\n        \"type\": \"station\",\n        \"code\": \"IT:turin\"\n      },\n      \"departure\": \"{{departureDate}}\"\n    }\n  ],\n  \"travelers\": [\n    {\n      \"age\": 27\n    }\n  ]\n}  \n"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search for RHB offers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 day int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 1);",
+											"",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"legs\": [\n    {\n      \"origin\": {\n        \"type\": \"station\",\n        \"code\": \"CH:chur\"\n      },\n      \"destination\": {\n        \"type\": \"station\",\n        \"code\": \"CH:alp_grum\"\n      },\n      \"departure\": \"{{departureDate}}\"\n    }\n  ],\n  \"travelers\": [\n    {\n      \"age\": 40\n    }\n  ]\n}  \n"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search for TER roundtrip offers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 weed int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 7);",
+											"",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"FR:nantes\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"FR:clisson\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        },\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"FR:clisson\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"FR:nantes\"\n            },\n            \"departure\": \"{{returnDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search for RENFE or OuigoSpain roundtrip offers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 weed int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 7);",
+											"",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"ES:madrid\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"ES:barcelona\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        },\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"ES:barcelona\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"ES:madrid\"\n            },\n            \"departure\": \"{{returnDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search for BAHN offers - Rail card",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 weed int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 7);",
+											"",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');",
+											"date.setDate(date.getDate() + 7);",
+											"postman.setEnvironmentVariable(\"return_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"legs\": [\n    {\n      \"origin\": {\n        \"type\": \"station\",\n        \"code\": \"DE:munich\"\n      },\n      \"destination\": {\n        \"type\": \"station\",\n        \"code\": \"DE:berlin\"\n      },\n      \"departure\": \"{{departureDate}}\"\n    }\n  ],\n  \"travelers\": [\n    {\n      \"age\": 40,\n            \"claimProductTypes\": [\n                \"DBAHN_CARD25_1\"\n            ]\n    }\n  ]\n}  \n"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search for SBB offers - Rail card",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 weed int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 7);",
+											"",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');",
+											"date.setDate(date.getDate() + 7);",
+											"postman.setEnvironmentVariable(\"return_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"CH:geneva\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"CH:lausanne\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"claimProductTypes\": [\n                \"SBB_HALF_FARE\"\n            ]\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search for TGV offers - Rail pass",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 weed int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 7);",
+											"",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"FR:nantes\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"FR:paris\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"claimProductTypes\": [\n                \"EUR1\"\n            ]\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search for Eurostar RIT offers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 day int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 1);",
+											"",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"CH:chur\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"CH:alp_grum\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"productFilters\": [\n                \"RIT\"\n            ]\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET last search",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 200 OK",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches/{{searchId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches",
+										"{{searchId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET last selected offer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 200 OK",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches/{{searchId}}/offers/{{offerId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches",
+										"{{searchId}}",
+										"offers",
+										"{{offerId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SEARCH OFFERS-PASS",
+					"item": [
+						{
+							"name": "Search for French ePasses",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponseBody = JSON.parse(responseBody);\r",
+											"// CONTEXT : Save the search ID\r",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);\r",
+											"\r",
+											"// CONTEXT : Save the 1st offer ID\r",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"place\": {\n        \"code\": \"FR\"\n    },\n    \"validityStartDate\": \"{{validityStartDate}}\",\n    \"travelers\": [\n        {\n            \"age\": 30\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/passes/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"passes",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search for Swiss ePasses",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponseBody = JSON.parse(responseBody);\r",
+											"// CONTEXT : Save the search ID\r",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);\r",
+											"\r",
+											"// CONTEXT : Save the 1st offer ID\r",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"place\": {\n\t\t\"code\": \"CH\"\n\t},\n\t\"validityStartDate\": \"{{validityStartDate}}\",\n\t\"travelers\": [\n\t\t{\n\t\t\t\"age\": 30\n\t\t}\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/passes/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"passes",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search by searchId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponseBody = JSON.parse(responseBody);\r",
+											"// CONTEXT : Save the search ID\r",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);\r",
+											"\r",
+											"// CONTEXT : Save the 1st offer ID\r",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/passes/searches/{{searchId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"passes",
+										"searches",
+										"{{searchId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search by offerId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponseBody = JSON.parse(responseBody);\r",
+											"// CONTEXT : Save the search ID\r",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);\r",
+											"\r",
+											"// CONTEXT : Save the 1st offer ID\r",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/passes/searches/{{searchId}}/offers/{{offerId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"passes",
+										"searches",
+										"{{searchId}}",
+										"offers",
+										"{{offerId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "3. BOOK",
+			"item": [
+				{
+					"name": "SALE",
+					"item": [
+						{
+							"name": "CREATE P2P booking with first offer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the booking ID",
+											"postman.setEnvironmentVariable(\"bookingId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the traveler ID",
+											"postman.setEnvironmentVariable(\"travelerId\", jsonResponseBody.bookingItems[0].travelers[0].id);",
+											"",
+											"// CONTEXT : Save the booking item ID",
+											"postman.setEnvironmentVariable(\"bookingItemId\", jsonResponseBody.bookingItems[0].id);",
+											"",
+											"// CONTEXT : Save the legId",
+											"postman.setEnvironmentVariable(\"legId\", jsonResponseBody.bookingItems[0].legs[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"offerLocations\" : [\r\n                \"/offers/point-to-point/searches/{{searchId}}/offers/{{offerId}}\"\r\n            ]\r\n        }\r\n    ]\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CREATE Pass booking with first offer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the booking ID",
+											"postman.setEnvironmentVariable(\"bookingId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the traveler ID",
+											"postman.setEnvironmentVariable(\"travelerId\", jsonResponseBody.bookingItems[0].travelers[0].id);",
+											"",
+											"// CONTEXT : Save the booking item ID",
+											"postman.setEnvironmentVariable(\"bookingItemId\", jsonResponseBody.bookingItems[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"offerLocations\" : [\r\n                \"/offers/passes/searches/{{searchId}}/offers/pass-offer-1\"\r\n            ]\r\n        }\r\n    ]\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Travelers",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"kind\": \"point-to-point\",\r\n        \"providerId\": \"PAX_SPEC_0\",\r\n        \"id\": \"{{travelerId}}\",\r\n        \"type\": \"ADULT\",\r\n        \"leadTraveler\": true,\r\n        \"age\": 30,\r\n        \"emailAddress\": \"{{travelerEmailAddress}}\",\r\n        \"phoneNumber\": \"{{travelerPhoneNumber}}\",\r\n        \"title\": \"MS\",\r\n        \"lastName\": \"TEST TRAVEL\",\r\n        \"firstName\": \"Test travel\",\r\n        \"dateOfBirth\": \"{{travelerDateOfBirth}}\",\r\n        \"travelerDocument\": {\r\n            \"countryCode\": \"FR\",\r\n            \"documentNumber\": \"{{passportNumber}}\",\r\n            \"expirationDate\": \"{{passportExpirationDate}}\",\r\n            \"type\": \"PASSPORT\"\r\n        },\r\n        \"countryOfResidence\": \"AS\"\r\n    }\r\n]"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/items/{{bookingItemId}}/travelers",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"items",
+										"{{bookingItemId}}",
+										"travelers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Travelers PassHolder",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"kind\": \"point-to-point\",\r\n        \"providerId\": \"PAX_SPEC_0\",\r\n        \"id\": \"{{travelerId}}\",\r\n        \"type\": \"ADULT\",\r\n        \"leadTraveler\": true,\r\n        \"age\": 30,\r\n        \"emailAddress\": \"{{travelerEmailAddress}}\",\r\n        \"phoneNumber\": \"{{travelerPhoneNumber}}\",\r\n        \"title\": \"MS\",\r\n        \"lastName\": \"TEST TRAVEL\",\r\n        \"firstName\": \"Test travel\",\r\n        \"dateOfBirth\": \"{{travelerDateOfBirth}}\",\r\n        \"travelerDocument\": {\r\n            \"countryCode\": \"FR\",\r\n            \"documentNumber\": \"{{passportNumber}}\",\r\n            \"expirationDate\": \"{{passportExpirationDate}}\",\r\n            \"type\": \"PASSPORT\"\r\n        },\r\n        \"reductionCardId\": \"{{travelerReductionCardId}}\"\r\n    }\r\n]"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/items/{{bookingItemId}}/travelers",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"items",
+										"{{bookingItemId}}",
+										"travelers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Checkout PREBOOK",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n        \"{{bookingItemId}}\"\r\n    ]\r\n    \r\n"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/checkout/prebook",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"checkout",
+										"prebook"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Checkout HOLD (optional)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/checkout/hold",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"checkout",
+										"hold"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Checkout PAY (optional)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/checkout/pay",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"checkout",
+										"pay"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Checkout CONFIRM with PRINT ASYNC",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/checkout/confirm?printOption=PRINT_ASYNC",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"checkout",
+										"confirm"
+									],
+									"query": [
+										{
+											"key": "printOption",
+											"value": "PRINT_ASYNC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PRINT",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/print",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"print"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET last booking",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 200 OK",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET bookings by query",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 200 OK",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings?query={{query}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings"
+									],
+									"query": [
+										{
+											"key": "query",
+											"value": "{{query}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "EDIT AGENCY DETAILS (optional)",
+					"item": [
+						{
+							"name": "Edit agency booking ref",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"agencyBookingReference\": \"ABCDE\"\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/agency-booking-reference",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"agency-booking-reference"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit agency contact",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"MR\",\r\n    \"lastName\": \"BONBEURRE\",\r\n    \"firstName\": \"Jean\",\r\n    \"emailAddress\": \"{{agencyEmailAddress}}\",\r\n    \"phoneNumber\": \"{{agencyPhoneNumber}}\"\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/contact",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"contact"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "MANAGE SERVICE OFFERS (OuigoSpain only)",
+					"item": [
+						{
+							"name": "Add a service",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"// - ASSERTIONS -\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"\r",
+											"// Assert : HTTP 201 NO CONTENT\r",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"\r",
+											"// Assert : Correlation Id in header\r",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
+											"\r",
+											"// Assert : Request Id in header\r",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-Point-Of-Sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"serviceId\": \"check serviceId of EXTRA_BAG in your booking information\",\r\n  \"fareOfferIds\": [\r\n    \"check fareOfferId in your booking information\"\r\n  ],\r\n  \"count\": 1\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/items/{{bookingItemId}}/service-offers",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"items",
+										"{{bookingItemId}}",
+										"service-offers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update a service",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"// - ASSERTIONS -\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"\r",
+											"// Assert : HTTP 201 NO CONTENT\r",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"\r",
+											"// Assert : Correlation Id in header\r",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
+											"\r",
+											"// Assert : Request Id in header\r",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-Point-Of-Sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"serviceId\": \"check serviceId of EXTRA_BAG in your booking information\",\r\n  \"fareOfferIds\": [\r\n    \"check fareOfferId in your booking information\"\r\n  ],\r\n  \"count\": 1\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/items/{{bookingItemId}}/service-offers/{{serviceOfferId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"items",
+										"{{bookingItemId}}",
+										"service-offers",
+										"{{serviceOfferId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete a service",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"// - ASSERTIONS -\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"\r",
+											"// Assert : HTTP 201 NO CONTENT\r",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"\r",
+											"// Assert : Correlation Id in header\r",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
+											"\r",
+											"// Assert : Request Id in header\r",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-Point-Of-Sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/items/{{bookingItemId}}/service-offers/{{serviceOfferId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"items",
+										"{{bookingItemId}}",
+										"service-offers",
+										"{{serviceOfferId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "REQUEST BILLING DOCS (Trenitalia only)",
+					"item": [
+						{
+							"name": "Search billing profiles",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"// - ASSERTIONS -\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"\r",
+											"// Assert : HTTP 201 NO CONTENT\r",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"\r",
+											"// Assert : Correlation Id in header\r",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
+											"\r",
+											"// Assert : Request Id in header\r",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-Point-Of-Sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/billing/documents/search-profile?vatNumber=TestVatNumber",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"billing",
+										"documents",
+										"search-profile"
+									],
+									"query": [
+										{
+											"key": "vatNumber",
+											"value": "TestVatNumber"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Claim billing documents with existing profile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"// - ASSERTIONS -\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"\r",
+											"// Assert : HTTP 201 NO CONTENT\r",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"\r",
+											"// Assert : Correlation Id in header\r",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
+											"\r",
+											"// Assert : Request Id in header\r",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"existingBillingProfileId\": \"use search billing profile service to find an id\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/billing/documents/claim",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"billing",
+										"documents",
+										"claim"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Claim billing documents with new fiscal profile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"// - ASSERTIONS -\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"\r",
+											"// Assert : HTTP 201 NO CONTENT\r",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"\r",
+											"// Assert : Correlation Id in header\r",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
+											"\r",
+											"// Assert : Request Id in header\r",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"newBillingProfile\": {\r\n        \"type\": \"fiscal\",\r\n        \"fiscalCode\": \"1234TEST\",\r\n        \"firstName\": \"Test\",\r\n        \"lastName\": \"TEST\",\r\n        \"address\": \"TEST address\",\r\n        \"country\": \"IT\",\r\n        \"province\": \"RM\",\r\n        \"city\": \"Rome\",\r\n        \"zipCode\": \"44000\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/billing/documents/claim",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"billing",
+										"documents",
+										"claim"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Claim billing documents with new vat profile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"// - ASSERTIONS -\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"\r",
+											"// Assert : HTTP 201 NO CONTENT\r",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"\r",
+											"// Assert : Correlation Id in header\r",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
+											"\r",
+											"// Assert : Request Id in header\r",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"newBillingProfile\": {\r\n        \"type\": \"vat\",\r\n        \"profileName\": \"TEST\",\r\n        \"vatNumber\": \"1234TEST\",\r\n        \"address\": \"TEST address\",\r\n        \"country\": \"IT\",\r\n        \"province\": \"RM\",\r\n        \"city\": \"Rome\",\r\n        \"zipCode\": \"44000\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/billing/documents/claim",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"billing",
+										"documents",
+										"claim"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "4. AFTERSALES",
+			"item": [
+				{
+					"name": "REFUND",
+					"item": [
+						{
+							"name": "REFUND Quotation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the quotation ID",
+											"postman.setEnvironmentVariable(\"refundQuotationId\", jsonResponseBody.id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"type\": \"REFUND\",\r\n    \"items\": [\r\n        {\r\n            \"id\": \"{{bookingItemId}}\"\r\n        }\r\n    ]\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/refunds",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"refunds"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Partial REFUND Quotation - P2P",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the quotation ID",
+											"postman.setEnvironmentVariable(\"refundQuotationId\", jsonResponseBody.id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"type\": \"REFUND\",\r\n    \"items\": [\r\n        {\r\n            \"id\": \"{{bookingItemId}}\",\r\n            \"cancellableItems\": [\r\n                {\r\n                    \"id\": \"To know which segments and travelers a cancellableItem will cancel, please refer to cancellableItem.fareOfferIds and bookingItem.fareOffers. Each fareOffer refers to a set of segments and travelers\"\r\n                }\r\n            }\r\n        ]\r\n    }"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/refunds",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"refunds"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Partial REFUND Quotation - Pass",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the quotation ID",
+											"postman.setEnvironmentVariable(\"refundQuotationId\", jsonResponseBody.id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"type\": \"REFUND\",\r\n    \"items\": [\r\n        {\r\n            \"id\": \"{{bookingItemId}}\",\r\n            \"travelers\": [\r\n                \"{{travelerId}}\"\r\n            ]\r\n        }\r\n    ]\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/refunds",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"refunds"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "REFUND Quotation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the quotation ID",
+											"postman.setEnvironmentVariable(\"refundQuotationId\", jsonResponseBody.id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/refunds/{{refundQuotationId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"refunds",
+										"{{refundQuotationId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "REFUND Confirmation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// CONTEXT : Save the quotation ID",
+											"postman.setEnvironmentVariable(\"refundQuotationId\", jsonResponseBody.id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/refunds/{{refundQuotationId}}/confirm",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"refunds",
+										"{{refundQuotationId}}",
+										"confirm"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "EXCHANGE",
+					"item": [
+						{
+							"name": "Search EXCHANGE offers",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 200;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// CONTEXT : Save the exchangeSearchId",
+											"postman.setEnvironmentVariable(\"exchangeSearchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the first exchangeOfferId",
+											"postman.setEnvironmentVariable(\"exchangeOfferId\", jsonResponseBody.offers[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"items\": [\r\n    {\r\n      \"id\": \"{{bookingItemId}}\",\r\n      \"legs\": [\r\n        {\r\n          \"id\": \"{{legId}}\",\r\n          \"departure\": \"{{exchangeDepartureDate}}\"\r\n        }\r\n      ]\r\n    }\r\n  ],\r\n  \"productFilters\": []\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/exchanges/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"exchanges",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search EXCHANGE offers change route (Trenitalia only)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 204\"] = responseCode.code === 200;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// CONTEXT : Save the exchangeSearchId",
+											"postman.setEnvironmentVariable(\"exchangeSearchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the first exchangeOfferId",
+											"postman.setEnvironmentVariable(\"exchangeOfferId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"items\": [\r\n    {\r\n      \"id\": \"{{bookingItemId}}\",\r\n      \"legs\": [\r\n        {\r\n          \"id\": \"{{legId}}\",\r\n          \"departure\": \"{{exchangeDepartureDate}}\",\r\n          \"origin\": {\r\n            \"type\": \"station\",\r\n            \"code\": \"IT:roma_termini\"\r\n          },\r\n          \"destination\": {\r\n            \"type\": \"city\",\r\n            \"code\": \"IT:turin\"\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/exchanges/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"exchanges",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve EXCHANGE Search",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the exchangeSearchId",
+											"postman.setEnvironmentVariable(\"exchangeSearchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the first exchangeOfferId",
+											"postman.setEnvironmentVariable(\"exchangeOfferId\", jsonResponseBody.offers[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/exchanges/searches/{{exchangeSearchId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"exchanges",
+										"searches",
+										"{{exchangeSearchId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "EXCHANGE Quotation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the quotation ID",
+											"postman.setEnvironmentVariable(\"exchangeQuotationId\", jsonResponseBody.id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n   \"items\": [\r\n      {\r\n         \"id\": \"{{bookingItemId}}\",\r\n         \"searchId\": \"{{exchangeSearchId}}\",\r\n         \"legs\": [\r\n            {\r\n               \"id\": \"{{legId}}\",\r\n               \"selectedOfferId\": \"{{exchangeOfferId}}\"\r\n            }\r\n         ]\r\n      }\r\n   ]\r\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/exchanges",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"exchanges"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "EXCHANGE Quotation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the quotation ID",
+											"postman.setEnvironmentVariable(\"exchangeQuotationId\", jsonResponseBody.id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/exchanges/{{exchangeQuotationId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"exchanges",
+										"{{exchangeQuotationId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "EXCHANGE Confirmation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the quotation ID",
+											"postman.setEnvironmentVariable(\"exchangeQuotationId\", jsonResponseBody.id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/exchanges/{{exchangeQuotationId}}/confirm",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"exchanges",
+										"{{exchangeQuotationId}}",
+										"confirm"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "AFTERSALE EDIT TRAVELER (Trenitalia only)",
+					"item": [
+						{
+							"name": "Edit traveler",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"// - ASSERTIONS -\r",
+											"// --------------------------------------------------------------------------------------------------\r",
+											"\r",
+											"// Assert : HTTP 201 NO CONTENT\r",
+											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"\r",
+											"// Assert : Correlation Id in header\r",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
+											"\r",
+											"// Assert : Request Id in header\r",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-Point-Of-Sale",
+										"value": "{{pos}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "x-correlationid",
+										"value": "{{correlationId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"editedTravelers\": [\r\n    {\r\n      \"travelerId\": \"{{travelerId}}\",\r\n      \"firstName\": \"Test new name\",\r\n      \"lastName\": \"TEST NEW NAME\"\r\n    }\r\n  ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/items/{{bookingItemId}}/travelers-editions",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"items",
+										"{{bookingItemId}}",
+										"travelers-editions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "5. RETRIEVE PLACES",
+			"item": [
+				{
+					"name": "GET Places Autocomplete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"var jsonResponseBody = JSON.parse(responseBody);",
+									"",
+									"// --------------------------------------------------------------------------------------------------",
+									"// - ASSERTIONS -",
+									"// --------------------------------------------------------------------------------------------------",
+									"",
+									"// Assert : HTTP 200 OK",
+									"tests[\"Status code : 200\"] = responseCode.code === 200;",
+									"",
+									"// Assert : Correlation Id in header",
+									"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+									"",
+									"// Assert : Request Id in header",
+									"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-point-of-sale",
+								"value": "{{pos}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiEndpoint}}/places/autocomplete?boost=city&query=pra&size=25",
+							"host": [
+								"{{apiEndpoint}}"
+							],
+							"path": [
+								"places",
+								"autocomplete"
+							],
+							"query": [
+								{
+									"key": "boost",
+									"value": "city"
+								},
+								{
+									"key": "query",
+									"value": "pra"
+								},
+								{
+									"key": "size",
+									"value": "25"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET All Places",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"var jsonResponseBody = JSON.parse(responseBody);",
+									"",
+									"// --------------------------------------------------------------------------------------------------",
+									"// - ASSERTIONS -",
+									"// --------------------------------------------------------------------------------------------------",
+									"",
+									"// Assert : HTTP 200 OK",
+									"tests[\"Status code : 200\"] = responseCode.code === 200;",
+									"",
+									"// Assert : Correlation Id in header",
+									"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+									"",
+									"// Assert : Request Id in header",
+									"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-point-of-sale",
+								"value": "{{pos}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiEndpoint}}/places",
+							"host": [
+								"{{apiEndpoint}}"
+							],
+							"path": [
+								"places"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "eyJraWQiOiJhOTExem91QmZ6djd2aW1PNlZQRE5vbUlnWFAwTjkxTHFcLytWSjBmQUFycz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI1M2w3a2N1azg5NDRwc2dnaXF2ZGUwcDlucyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoic2FuZGJveC1vdnMtZXJhbWFpbi1hcGktc2VydmVyXC9hcGk6ZnVsbCIsImF1dGhfdGltZSI6MTU2ODk5MTc3MiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tXC9ldS13ZXN0LTFfenh0WGRVTEVyIiwiZXhwIjoxNTY4OTk1MzcyLCJpYXQiOjE1Njg5OTE3NzIsInZlcnNpb24iOjIsImp0aSI6IjdlMDM1MmQ2LTlmMTQtNDJiYi05YzEwLWRlODVmYzRkMDdhOSIsImNsaWVudF9pZCI6IjUzbDdrY3VrODk0NHBzZ2dpcXZkZTBwOW5zIn0.CwA7h86RaYP7rr_3-NU2hVM-Vel6oRpHORPyJCtb601s3rLDK3NnznMug8BRvfg1deMWYOrat6HnNn5IRngovFfJ1fnQh6JuOHuXb2Fzu9O6jXLjb7tWbhjvSu33T3VoK7DDOBK0PEeNTacFK4BqH58W9wJ6V42N4Uf7eKS-jh4HEG8J9JEB-ebIizEUp7U4f3tX7K7o_ZrlWJfg-6WKXh9-kWslh66mNcstZwh_CNHn2yBPFJh_KN3BLooIbCv1-icwX5dGs1gJjdyf645Zu38PabXR0TpqWJIkIniR8igRh4kNvN7Flw09kjVlfXbhf9UI90LREA3GO9aN8Q8atw",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "Bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"postman.setGlobalVariable(\"loadUtils\", function loadUtils() {",
+					"    let utils = {};",
+					"   ",
+					"    utils.load = function(name) {",
+					"        return postman.getEnvironmentVariable(name);",
+					"    }",
+					"    ",
+					"    utils.loadObject = function(name, init = function() { return null;}) {",
+					"        var data = utils.load(name);",
+					"        if(data == null || data === \"\") {",
+					"            data = init();",
+					"        } else {",
+					"            data = JSON.parse(data);",
+					"        }",
+					"        ",
+					"        return data;",
+					"    }",
+					"    ",
+					"    utils.loadArray = function(name) {",
+					"        return utils.loadObject(name, function() { ",
+					"            return [];",
+					"        })",
+					"    }",
+					"    ",
+					"    utils.loadNum = function(name) {",
+					"        return utils.loadObject(name, function() { ",
+					"            return 0;",
+					"        })",
+					"    }",
+					"    ",
+					"    utils.save = function(name, data) {",
+					"        postman.setEnvironmentVariable(name, data);",
+					"    }",
+					"    ",
+					"    utils.saveObject = function(name, data) {",
+					"        utils.save(name, JSON.stringify(data));",
+					"    }",
+					"    ",
+					"    utils.push = function(arrayName, entry) {",
+					"        var array = utils.loadArray(arrayName);",
+					"        array.push(entry);",
+					"        utils.saveObject(arrayName, array);",
+					"    }",
+					"    ",
+					"    utils.isNotEmpty = function(array) {",
+					"        return array && array.length;",
+					"    }",
+					"",
+					"    return utils;",
+					"",
+					"} + '; loadUtils();');"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
