@@ -247,7 +247,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"legs\": [\n    {\n      \"origin\": {\n        \"type\": \"city\",\n        \"code\": \"IT:rome\"\n      },\n      \"destination\": {\n        \"type\": \"station\",\n        \"code\": \"IT:turin\"\n      },\n      \"departure\": \"{{departureDate}}\"\n    }\n  ],\n  \"travelers\": [\n    {\n      \"age\": 27\n    }\n  ]\n}  \n"
+									"raw": "{\n  \"legs\": [\n    {\n      \"origin\": {\n        \"type\": \"city\",\n        \"code\": \"IT:rome\"\n      },\n      \"destination\": {\n        \"type\": \"city\",\n        \"code\": \"IT:turin\"\n      },\n      \"departure\": \"2023-11-26T00:00:00\"\n    }\n  ],\n  \"travelers\": [\n    {\n      \"age\": 30\n    }\n  ]\n}  \n"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
@@ -915,7 +915,7 @@
 											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
 											"",
 											"// CONTEXT : Save the 1st offer ID",
-											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.id);",
 											""
 										],
 										"type": "text/javascript"
@@ -1021,7 +1021,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"place\": {\n        \"code\": \"FR\"\n    },\n    \"validityStartDate\": \"{{validityStartDate}}\",\n    \"travelers\": [\n        {\n            \"age\": 30\n        }\n    ]\n}"
+									"raw": "{\n    \"place\": {\n        \"code\": \"FR\"\n    },\n    \"validityStartDate\": \"{{validityStartDate}}\",\n    \"travelers\": [\n        {\n            \"age\": 30\n        },\n        {\n            \"age\": 30\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/offers/passes/searches",
@@ -1165,7 +1165,7 @@
 											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);\r",
 											"\r",
 											"// CONTEXT : Save the 1st offer ID\r",
-											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);\r",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.id);\r",
 											""
 										],
 										"type": "text/javascript"
@@ -1311,7 +1311,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"offerLocations\" : [\r\n                \"/offers/point-to-point/searches/{{searchId}}/offers/{{offerId}}\"\r\n            ]\r\n        }\r\n    ]\r\n}"
+									"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"offerLocations\": [\r\n                \"/offers/point-to-point/searches/{{searchId}}/offers/{{offerId}}\"\r\n            ]\r\n        }\r\n    ]\r\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/bookings",
@@ -1388,7 +1388,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"offerLocations\" : [\r\n                \"/offers/passes/searches/{{searchId}}/offers/pass-offer-1\"\r\n            ]\r\n        }\r\n    ]\r\n}"
+									"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"offerLocations\" : [\r\n                \"/offers/passes/searches/{{searchId}}/offers/{{offerId}}\"\r\n            ]\r\n        }\r\n    ]\r\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/bookings",
@@ -1415,7 +1415,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -1479,7 +1479,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -1543,7 +1543,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -1606,7 +1606,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -1665,7 +1665,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -1724,7 +1724,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -1789,7 +1789,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -1942,6 +1942,61 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Delete booking item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 NO CONTENT",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
+											"",
+											"// Assert : Correlation Id in header",
+											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
+											"",
+											"// Assert : Request Id in header",
+											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"url": {
+									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/items/{{bookingItemId}}",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"bookings",
+										"{{bookingId}}",
+										"items",
+										"{{bookingItemId}}"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -1961,7 +2016,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -2023,7 +2078,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -2090,7 +2145,7 @@
 											"// --------------------------------------------------------------------------------------------------\r",
 											"\r",
 											"// Assert : HTTP 201 NO CONTENT\r",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;\r",
 											"\r",
 											"// Assert : Correlation Id in header\r",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
@@ -2156,7 +2211,7 @@
 											"// --------------------------------------------------------------------------------------------------\r",
 											"\r",
 											"// Assert : HTTP 201 NO CONTENT\r",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;\r",
 											"\r",
 											"// Assert : Correlation Id in header\r",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
@@ -2223,7 +2278,7 @@
 											"// --------------------------------------------------------------------------------------------------\r",
 											"\r",
 											"// Assert : HTTP 201 NO CONTENT\r",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;\r",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;\r",
 											"\r",
 											"// Assert : Correlation Id in header\r",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");\r",
@@ -2695,7 +2750,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"type\": \"REFUND\",\r\n    \"items\": [\r\n        {\r\n            \"id\": \"{{bookingItemId}}\",\r\n            \"cancellableItems\": [\r\n                {\r\n                    \"id\": \"To know which segments and travelers a cancellableItem will cancel, please refer to cancellableItem.fareOfferIds and bookingItem.fareOffers. Each fareOffer refers to a set of segments and travelers\"\r\n                }\r\n            }\r\n        ]\r\n    }"
+									"raw": "{\r\n    \"type\": \"REFUND\",\r\n    \"items\": [\r\n        {\r\n            \"id\": \"{{bookingItemId}}\",\r\n            \"cancellableItems\": [\r\n                {\r\n                    \"id\": \"To know which segments and travelers a cancellableItem will cancel, please refer to cancellableItem.fareOfferIds and bookingItem.fareOffers. Each fareOffer refers to a set of segments and travelers\"\r\n                }\r\n            ]\r\n        }\r\n    ]\r\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/refunds",
@@ -2798,7 +2853,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -2863,16 +2918,14 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 204;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
 											"",
 											"// Assert : Request Id in header",
 											"tests[\"Header Check : x-requestid is present\"] = postman.getResponseHeader(\"x-requestid\");",
-											"",
-											"// CONTEXT : Save the quotation ID",
-											"postman.setEnvironmentVariable(\"refundQuotationId\", jsonResponseBody.id);"
+											""
 										],
 										"type": "text/javascript"
 									}
@@ -2933,7 +2986,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 200;",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -2972,7 +3025,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"items\": [\r\n    {\r\n      \"id\": \"{{bookingItemId}}\",\r\n      \"legs\": [\r\n        {\r\n          \"id\": \"{{legId}}\",\r\n          \"departure\": \"{{exchangeDepartureDate}}\"\r\n        }\r\n      ]\r\n    }\r\n  ],\r\n  \"productFilters\": []\r\n}"
+									"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"id\": \"{{bookingItemId}}\",\r\n            \"legs\": [\r\n                {\r\n                    \"id\": \"{{legId}}\",\r\n                    \"departure\": \"{{exchangeDepartureDate}}\"\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"productFilters\": []\r\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/exchanges/searches",
@@ -3002,7 +3055,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 204\"] = responseCode.code === 200;",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -3073,7 +3126,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -3146,7 +3199,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -3217,7 +3270,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -3285,7 +3338,7 @@
 											"// --------------------------------------------------------------------------------------------------",
 											"",
 											"// Assert : HTTP 201 NO CONTENT",
-											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"tests[\"Status code : 200\"] = responseCode.code === 200;",
 											"",
 											"// Assert : Correlation Id in header",
 											"tests[\"Header Check : x-correlationid is present\"] = postman.getResponseHeader(\"x-correlationid\");",
@@ -3565,21 +3618,11 @@
 		}
 	],
 	"auth": {
-		"type": "oauth2",
-		"oauth2": [
+		"type": "bearer",
+		"bearer": [
 			{
-				"key": "accessToken",
-				"value": "eyJraWQiOiJhOTExem91QmZ6djd2aW1PNlZQRE5vbUlnWFAwTjkxTHFcLytWSjBmQUFycz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI1M2w3a2N1azg5NDRwc2dnaXF2ZGUwcDlucyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoic2FuZGJveC1vdnMtZXJhbWFpbi1hcGktc2VydmVyXC9hcGk6ZnVsbCIsImF1dGhfdGltZSI6MTU2ODk5MTc3MiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tXC9ldS13ZXN0LTFfenh0WGRVTEVyIiwiZXhwIjoxNTY4OTk1MzcyLCJpYXQiOjE1Njg5OTE3NzIsInZlcnNpb24iOjIsImp0aSI6IjdlMDM1MmQ2LTlmMTQtNDJiYi05YzEwLWRlODVmYzRkMDdhOSIsImNsaWVudF9pZCI6IjUzbDdrY3VrODk0NHBzZ2dpcXZkZTBwOW5zIn0.CwA7h86RaYP7rr_3-NU2hVM-Vel6oRpHORPyJCtb601s3rLDK3NnznMug8BRvfg1deMWYOrat6HnNn5IRngovFfJ1fnQh6JuOHuXb2Fzu9O6jXLjb7tWbhjvSu33T3VoK7DDOBK0PEeNTacFK4BqH58W9wJ6V42N4Uf7eKS-jh4HEG8J9JEB-ebIizEUp7U4f3tX7K7o_ZrlWJfg-6WKXh9-kWslh66mNcstZwh_CNHn2yBPFJh_KN3BLooIbCv1-icwX5dGs1gJjdyf645Zu38PabXR0TpqWJIkIniR8igRh4kNvN7Flw09kjVlfXbhf9UI90LREA3GO9aN8Q8atw",
-				"type": "string"
-			},
-			{
-				"key": "tokenType",
-				"value": "Bearer",
-				"type": "string"
-			},
-			{
-				"key": "addTokenTo",
-				"value": "header",
+				"key": "token",
+				"value": "{{idToken}}",
 				"type": "string"
 			}
 		]
