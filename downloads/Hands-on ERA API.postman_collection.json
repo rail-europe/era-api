@@ -247,7 +247,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"legs\": [\n    {\n      \"origin\": {\n        \"type\": \"city\",\n        \"code\": \"IT:rome\"\n      },\n      \"destination\": {\n        \"type\": \"city\",\n        \"code\": \"IT:turin\"\n      },\n      \"departure\": \"2023-11-26T00:00:00\"\n    }\n  ],\n  \"travelers\": [\n    {\n      \"age\": 30\n    }\n  ]\n}  \n"
+									"raw": "\n{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"city\",\n                \"code\": \"IT:milan\"\n            },\n            \"destination\": {\n                \"type\": \"city\",\n                \"code\": \"IT:turin\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 30\n        }\n    ]\n}\n"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
