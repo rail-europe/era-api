@@ -101,6 +101,88 @@
 					"name": "SEARCH OFFERS-PTP",
 					"item": [
 						{
+							"name": "Search for Multiproviders offers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 weed int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 7);",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');",
+											"date.setDate(date.getDate() + 7);",
+											"postman.setEnvironmentVariable(\"return_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"city\",\n                \"code\": \"GB:london\"\n            },\n            \"destination\": {\n                \"type\": \"city\",\n                \"code\": \"ES:madrid\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40\n        }\n    ],\n    \"multiProviderEnabled\": true\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Search for RDG offers",
 							"event": [
 								{
