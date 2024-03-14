@@ -655,7 +655,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"legs\": [\n    {\n      \"origin\": {\n        \"type\": \"station\",\n        \"code\": \"DE:munich\"\n      },\n      \"destination\": {\n        \"type\": \"station\",\n        \"code\": \"DE:berlin\"\n      },\n      \"departure\": \"{{departureDate}}\"\n    }\n  ],\n  \"travelers\": [\n    {\n      \"age\": 40,\n            \"claimProductTypes\": [\n                \"DBAHN_CARD25_1\"\n            ]\n    }\n  ]\n}  \n"
+									"raw": "{\n  \"legs\": [\n    {\n      \"origin\": {\n        \"type\": \"station\",\n        \"code\": \"DE:munich\"\n      },\n      \"destination\": {\n        \"type\": \"station\",\n        \"code\": \"DE:berlin\"\n      },\n      \"departure\": \"{{departureDate}}\"\n    }\n  ],\n  \"travelers\": [\n    {\n      \"age\": 40,\n            \"cards\": [\n        {\n          \"code\": \"DBAHN_CARD25_1\",\n          \"type\": \"REDUCTION_CARD\"\n        }\n      ]\n    }\n  ]\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
@@ -738,7 +738,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"CH:geneva\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"CH:lausanne\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"claimProductTypes\": [\n                \"SBB_HALF_FARE\"\n            ]\n        }\n    ]\n}"
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"CH:geneva\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"CH:lausanne\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"cards\": [\n        {\n          \"code\": \"SBB_HALF_FARE\",\n          \"type\": \"REDUCTION_CARD\"\n        }\n      ]\n    }\n  ]\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
@@ -819,7 +819,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"FR:nantes\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"FR:paris\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"claimProductTypes\": [\n                \"EUR1\"\n            ]\n        }\n    ]\n}"
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"FR:nantes\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"FR:paris\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"cards\": [\n        {\n          \"code\": \"EUR1\",\n          \"type\": \"TRAVEL_PASS\"\n        }\n      ]\n    }\n  ]\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
