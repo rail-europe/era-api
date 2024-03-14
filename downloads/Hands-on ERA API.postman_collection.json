@@ -427,6 +427,87 @@
 							"response": []
 						},
 						{
+							"name": "Search for OBB offers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var moment = require('moment');",
+											"",
+											"// Calculate the departure date 1 day int the futur",
+											"var date = new Date();",
+											"date.setDate(date.getDate() + 1);",
+											"",
+											"postman.setEnvironmentVariable(\"departure_date\", moment(date).format('YYYY-MM-DD') + 'T00:00:00');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"var jsonResponseBody = JSON.parse(responseBody);",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - ASSERTIONS -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// Assert : HTTP 201 CREATED",
+											"tests[\"Status code : 201\"] = responseCode.code === 201;",
+											"",
+											"// --------------------------------------------------------------------------------------------------",
+											"// - CONTEXT -",
+											"// --------------------------------------------------------------------------------------------------",
+											"",
+											"// CONTEXT : Save the search ID",
+											"postman.setEnvironmentVariable(\"searchId\", jsonResponseBody.id);",
+											"",
+											"// CONTEXT : Save the 1st offer ID",
+											"postman.setEnvironmentVariable(\"offerId\", jsonResponseBody.offers[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "x-point-of-sale",
+										"value": "{{pos}}"
+									},
+									{
+										"key": "x-correlationid",
+										"type": "text",
+										"value": "{{correlationId}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"AT:innsbruck_hbf\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"AT:wien_hbf\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 30\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
+									"host": [
+										"{{apiEndpoint}}"
+									],
+									"path": [
+										"offers",
+										"point-to-point",
+										"searches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Search for TER roundtrip offers",
 							"event": [
 								{
@@ -655,7 +736,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"legs\": [\n    {\n      \"origin\": {\n        \"type\": \"station\",\n        \"code\": \"DE:munich\"\n      },\n      \"destination\": {\n        \"type\": \"station\",\n        \"code\": \"DE:berlin\"\n      },\n      \"departure\": \"{{departureDate}}\"\n    }\n  ],\n  \"travelers\": [\n    {\n      \"age\": 40,\n            \"cards\": [\n        {\n          \"code\": \"DBAHN_CARD25_1\",\n          \"type\": \"REDUCTION_CARD\"\n        }\n      ]\n    }\n  ]\n}"
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"DE:munich\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"DE:berlin\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"cards\": [\n                {\n                    \"code\": \"DBAHN_CARD50_2\",\n                    \"type\": \"REDUCTION_CARD\"\n                }\n            ]\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
@@ -738,7 +819,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"CH:geneva\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"CH:lausanne\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"cards\": [\n        {\n          \"code\": \"SBB_HALF_FARE\",\n          \"type\": \"REDUCTION_CARD\"\n        }\n      ]\n    }\n  ]\n}"
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"CH:geneva\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"CH:lausanne\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"cards\": [\n                {\n                    \"code\": \"SBB_HALF_FARE\",\n                    \"type\": \"REDUCTION_CARD\"\n                }\n            ]\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
@@ -819,7 +900,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"FR:nantes\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"FR:paris\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"cards\": [\n        {\n          \"code\": \"EUR1\",\n          \"type\": \"TRAVEL_PASS\"\n        }\n      ]\n    }\n  ]\n}"
+									"raw": "{\n    \"legs\": [\n        {\n            \"origin\": {\n                \"type\": \"station\",\n                \"code\": \"FR:nantes\"\n            },\n            \"destination\": {\n                \"type\": \"station\",\n                \"code\": \"FR:paris\"\n            },\n            \"departure\": \"{{departureDate}}\"\n        }\n    ],\n    \"travelers\": [\n        {\n            \"age\": 40,\n            \"cards\": [\n                {\n                    \"code\": \"EUR1\",\n                    \"type\": \"TRAVEL_PASS\"\n                }\n            ]\n        }\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/offers/point-to-point/searches",
@@ -1594,7 +1675,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "[\r\n    {\r\n        \"id\": \"{{travelerId}}\",\r\n        \"type\": \"ADULT\",\r\n        \"leadTraveler\": true,\r\n        \"age\": 30,\r\n        \"emailAddress\": \"{{travelerEmailAddress}}\",\r\n        \"phoneNumber\": \"{{travelerPhoneNumber}}\",\r\n        \"title\": \"MS\",\r\n        \"lastName\": \"TEST TRAVEL\",\r\n        \"firstName\": \"Test travel\",\r\n        \"dateOfBirth\": \"{{travelerDateOfBirth}}\",\r\n        \"travelerDocument\": {\r\n            \"countryCode\": \"FR\",\r\n            \"documentNumber\": \"{{passportNumber}}\",\r\n            \"expirationDate\": \"{{passportExpirationDate}}\",\r\n            \"type\": \"PASSPORT\"\r\n        },\r\n        \"reductionCardId\": \"{{travelerReductionCardId}}\"\r\n    }\r\n]"
+									"raw": "[\r\n    {\r\n        \"kind\": \"point-to-point\",\r\n        \"providerId\": \"PAX_SPEC_0\",\r\n        \"id\": \"{{travelerId}}\",\r\n        \"type\": \"ADULT\",\r\n        \"leadTraveler\": true,\r\n        \"age\": 30,\r\n        \"emailAddress\": \"{{travelerEmailAddress}}\",\r\n        \"phoneNumber\": \"{{travelerPhoneNumber}}\",\r\n        \"title\": \"MS\",\r\n        \"lastName\": \"JAVELL\",\r\n        \"firstName\": \"Audette\",\r\n        \"dateOfBirth\": \"1993-01-01\",\r\n        \"travelerDocument\": {\r\n            \"countryCode\": \"FR\",\r\n            \"documentNumber\": \"ZAJKLjd2983\",\r\n            \"expirationDate\": \"2030-03-25T11:00:00\",\r\n            \"type\": \"PASSPORT\"\r\n        },\r\n        \"cards\": [\r\n            {\r\n                \"code\": \"SBB_HALF_FARE\",\r\n                \"type\": \"REDUCTION_CARD\",\r\n                \"number\": \"293089029\"\r\n            }\r\n        ]\r\n    }\r\n]"
 								},
 								"url": {
 									"raw": "{{apiEndpoint}}/bookings/{{bookingId}}/items/{{bookingItemId}}/travelers",
